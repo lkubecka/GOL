@@ -31,9 +31,9 @@ function neighbours(cell) {
 }
 
 function neighboursCount(cell, generation) {
-    return neighbours(cell).reduce(function(num, n) {
-        return num + (isAlive(n, generation) ? 1 : 0);
-    }, 0);
+    return neighbours(cell).filter(function(n) {
+        return isAlive(n, generation);
+    }).length;
 }
 
 function candidates(generation) {
