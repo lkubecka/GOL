@@ -1,5 +1,5 @@
 {
-    "name": "tdd",
+    "name": "gol_zombie",
     "version": "1.0.0",
     "description": "tdd boilerplate",
     "main": "helloWorld.js",
@@ -31,6 +31,13 @@
         "karma-html-detailed-reporter": "^1.1.21",
         "karma-jasmine": "^1.1.0",
         "karma-phantomjs-launcher": "^1.0.4",
-        "phantomjs": "^2.1.7"
-    }
+        "phantomjs-prebuilt": "^2.1.15"
+    },
+    "directories": {
+        "test": "tests"
+    },
+    "keywords": [
+        "gol",
+        "zombie"
+    ]
 }
