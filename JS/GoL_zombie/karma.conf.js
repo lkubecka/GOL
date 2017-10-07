@@ -12,11 +12,19 @@ module.exports = function(config) {
         // available frameworks: https://npmjs.org/browse/keyword/karma-adapter
         frameworks: ['jasmine'],
 
+        plugins: [
+            'karma-jasmine',
+            'karma-chrome-launcher',
+            'karma-babel-preprocessor'
+        ],
 
         // list of files / patterns to load in the browser
         files: [
-            'js/**/*.js',
-            'tests/**/*.js'
+            //'js/**/*.js',
+            //'tests/**/*.js',
+            "node_modules/karma-babel-preprocessor/node_modules/babel-core/browser-polyfill.js",
+            "js/**/*.es6",
+            "test/**/*.es6"
         ],
 
 
@@ -26,7 +34,22 @@ module.exports = function(config) {
 
         // preprocess matching files before serving them to the browser
         // available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
-        preprocessors: {},
+        preprocessors: {
+            "js/**/*.js": ["babel"],
+            "test/**/*.js": ["babel"]
+        },
+
+        "babelPreprocessor": {
+            options: {
+                sourceMap: "inline"
+            },
+            filename: function(file) {
+                return file.originalPath.replace(/\.js$/, ".es6.js");
+            },
+            sourceFileName: function(file) {
+                return file.originalPath;
+            }
+        },
 
 
         // test results reporter to use
@@ -56,6 +79,16 @@ module.exports = function(config) {
         // available browser launchers: https://npmjs.org/browse/keyword/karma-launcher
         browsers: ['PhantomJS'],
 
+        // browsers: ['Chrome', 'Chrome_without_security'], // You may use 'ChromeCanary', 'Chromium' or any other supported browser 
+
+        // you can define custom flags 
+        customLaunchers: {
+            Chrome_without_security: {
+                base: 'Chrome',
+                flags: ['--disable-web-security']
+            }
+        },
+
 
         // Continuous Integration mode
         // if true, Karma captures browsers, runs the tests and exits
@@ -75,7 +108,8 @@ module.exports = function(config) {
         plugins: [
             'karma-jasmine',
             'karma-phantomjs-launcher',
-            'karma-html-detailed-reporter'
+            'karma-html-detailed-reporter',
+            'karma-chrome-launcher'
         ],
 
         // configure the HTML-Detailed-Reporter to put all results in one file    

@@ -1,7 +1,13 @@
 var RULES = [
-    { isAlive: true, neighboursCount: 2 },
-    { isAlive: true, neighboursCount: 3 },
-    { isAlive: false, neighboursCount: 3 }
+    { state: "alive", neighboursCount: 2, nextState: "alive" },
+    { state: "alive", neighboursCount: 3, nextState: "alive" },
+    { state: "dead", neighboursCount: 3, nextState: "alive" },
+    { state: "alive", age: 3, nextState: "zombie" },
+    { state: "alive", zombieCount: 1, nextState: "zombie" },
+    //{ state: "zombie", nextState: "dead" },
+
+    //{ isAlive: true, neighboursCount: 3 },
+    // { isAlive: false, neighboursCount: 3 },
 ];
 
 var NEIGHBOURS = [
@@ -10,11 +16,34 @@ var NEIGHBOURS = [
     { x: -1, y: 1 }, { x: 0, y: 1 }, { x: 1, y: 1 }
 ];
 
-var result = willAlive(true, 2);
 
-function willAlive(isAlive, neighboursCount) {
+function uniqueBy(a, key) {
+    var seen = {};
+    return a.filter(function(item) {
+        var k = key(item);
+        return seen.hasOwnProperty(k) ? false : (seen[k] = true);
+    });
+};
+
+function isIn(elem, arr) {
+    var lookup = arr.reduce(function(acc, curr) {
+        acc[JSON.stringify(curr)] = curr;
+        return acc;
+    }, {});
+    return lookup.hasOwnProperty(JSON.stringify(elem));
+};
+
+function isEqual(a, b) {
+    return a.filter(function(item) {
+        return isIn(item, b);
+    }).length === a.length;
+};
+
+
+
+function willBeAlive(state, neighboursCount) {
     return RULES.some(function(r) {
-        return r.isAlive === isAlive && r.neighboursCount === neighboursCount;
+        return r.state === (isAlive ? "alive" : "dead") && r.neighboursCount === neighboursCount;
     });
 }
 
@@ -36,14 +65,33 @@ function neighboursCount(cell, generation) {
     }).length;
 }
 
-function candidates(generation) {
-    return generation.reduce(function(candidates, cell) {
-        return candidates.concat(neighbours(cell)).concat([cell]);
-    }, [])
-}
+function deathCandidates(generation) {
+    return uniqueBy(generation.reduce(function(candidates, cell) {
+        return candidates.concat(neighbours(cell));
+    }, []), JSON.stringify).filter(function(c) {
+        return isIn(c, generation) ? false : true;
+    });
 
-function nextGeneration(generation) {
-    return candidates(generation).reduce(function(nextGeneration, candidate) {
-        return !isAlive(candidate, nextGeneration) && (willAlive(isAlive(candidate, generation), neighboursCount(candidate, generation))) ? nextGeneration.concat(candidate) : nextGeneration;
-    }, [])
+};
+
+function nextGeneration(livingCells) {
+    var deathCells = deathCandidates(livingCells);
+    var nextGenDeath = deathCells.reduce(function(acc, cell) {
+        var nc = neighboursCount(cell, livingCells);
+        if (!isAlive(cell, acc) && (willBeAlive(false, nc)))
+            return acc.concat(cell);
+        return acc;
+    }, []);
+
+    var nextGenLiving = livingCells.reduce(function(acc, cell) {
+        var nc = neighboursCount(cell, livingCells);
+        if (!isAlive(cell, acc) && (willBeAlive(true, nc)))
+            return acc.concat(cell);
+        return acc;
+    }, []);
+
+    nextGenLiving.map(function(c) {
+        return { x: c.x, y: c.y, gen: c.gen + 1 };
+    });
+    return nextGenDeath.concat(nextGenLiving);
 }
